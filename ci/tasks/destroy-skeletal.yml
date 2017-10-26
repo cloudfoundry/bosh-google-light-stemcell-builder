@@ -1,0 +1,14 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: boshcpi/gce-cpi-release
+
+inputs:
+  - name: deployment-state
+  - name: builder-src
+
+run:
+  path: builder-src/ci/tasks/destroy-skeletal.sh
