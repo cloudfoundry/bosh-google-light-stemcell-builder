@@ -3,7 +3,7 @@
 set -e
 
 src_dir="$( cd $(dirname $0) && pwd )"
-workspace_dir="$( cd ${my_dir} && cd ../.. && pwd )"
+workspace_dir="$( cd ${my_dir} && cd .. && pwd )"
 
 # inputs
 deployment_state="$( cd "${workspace_dir}/deployment-state" && pwd )"
