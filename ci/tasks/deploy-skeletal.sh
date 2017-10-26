@@ -2,8 +2,8 @@
 
 set -e
 
-src_dir="$( cd $(dirname $0) && pwd )"
-workspace_dir="$( cd ${src_dir} && cd ../.. && pwd )"
+src_dir="$( cd $(dirname $0) && cd ../.. && pwd )"
+workspace_dir="$( cd ${src_dir} && cd .. && pwd )"
 
 # env
 : ${SSH_PRIVATE_KEY:?}
