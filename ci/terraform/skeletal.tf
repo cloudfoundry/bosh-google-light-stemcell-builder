@@ -5,7 +5,8 @@ provider "google" {
 }
 
 resource "google_compute_network" "skeletal" {
-  name = "stemcell-ci-${var.env_name}"
+  name                    = "stemcell-ci-${var.env_name}"
+  auto_create_subnetworks = false
 }
 
 // Subnet for the skeletal deployment
