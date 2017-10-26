@@ -2,8 +2,8 @@
 
 set -e
 
-src_dir="$( cd "$( dirname "$0" )" && cd ../../../.. && pwd )"
-workspace_dir="$( cd "${src_dir}/.." && pwd )"
+src_dir="$( cd $(dirname $0) && pwd )"
+workspace_dir="$( cd ${my_dir} && cd ../.. && pwd )"
 
 # env
 : ${SSH_PRIVATE_KEY:?}
@@ -43,7 +43,7 @@ pushd "${output_dir}" > /dev/null
     -v gce_credentials_json="'${GCE_CREDENTIALS_JSON}'" \
     -v ssh_private_key="bosh.pem" \
     -l "${terraform_config}/metadata" \
-    "${src_dir}/ci/stemcell/light/skeletal-deployment.yml" > ./skeletal-deployment.yml
+    "${src_dir}/ci/skeletal-deployment.yml" > ./skeletal-deployment.yml
 
   ${bosh_cli} -n create-env ./skeletal-deployment.yml
 popd > /dev/null
