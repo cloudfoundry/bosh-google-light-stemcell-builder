@@ -1,0 +1,16 @@
+---
+- path: /sha1?
+  type: replace
+  value: ((light_stemcell_sha1))
+
+- path: /stemcell_formats?
+  type: replace
+  value: ((stemcell_formats))
+
+- path: /cloud_properties/source_url?
+  type: replace
+  value: ((source_url))
+
+- path: /cloud_properties/raw_disk_sha1?
+  type: replace
+  value: ((raw_disk_sha1))

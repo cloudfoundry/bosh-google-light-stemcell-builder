@@ -6,6 +6,7 @@ set -eu
 : ${BOSH_IO_BUCKET_NAME:?} # used to check if current stemcell already exists
 
 # inputs
+builder_src="$PWD/builder-src"
 stemcell_dir="$PWD/stemcell"
 
 # outputs
@@ -43,9 +44,17 @@ pushd working_dir
 
   > image
   light_stemcell_sha1=$(sha1sum image | awk '{print $1}')
-  sed -i '/^sha1: .*/c\sha1: '${light_stemcell_sha1}'' stemcell.MF
-  echo "  source_url: https://storage.googleapis.com/${BUCKET_NAME}/${raw_stemcell_name}" >> stemcell.MF
-  echo "  raw_disk_sha1: ${raw_disk_sha1}" >> stemcell.MF
+  stemcell_format="google-light"
+
+  cp stemcell.MF /tmp/stemcell.MF.tmp
+
+  bosh int \
+    -o $builder_src/ci/assets/light-stemcell-ops.yml \
+    -v "light_stemcell_sha1=$light_stemcell_sha1" \
+    -v 'stemcell_formats=["google-light"]' \
+    -v "source_url=https://storage.googleapis.com/${BUCKET_NAME}/${raw_stemcell_name}" \
+    -v "raw_disk_sha1=${raw_disk_sha1}" \
+    /tmp/stemcell.MF.tmp > stemcell.MF
 
   light_stemcell_path="${light_stemcell_dir}/${light_stemcell_name}"
   tar czvf "${light_stemcell_path}" *
