@@ -32,14 +32,6 @@ groups:
   jobs:
   - ubuntu-trusty-stemcell-3468
 
-- name: deprecated
-  jobs:
-  - centos-7-stemcell-3312
-  - centos-7-stemcell-3363
-  - centos-7-stemcell-3431
-  - ubuntu-trusty-stemcell-3263
-  - ubuntu-trusty-stemcell-3431
-
 - name: alpha
   jobs:
   - ubuntu-trusty-stemcell-alpha
@@ -198,23 +190,6 @@ jobs:
       - *upload-ubuntu-raw-stemcells
       - *verify-stemcell-boots
 
-  - name: ubuntu-trusty-stemcell-3263
-    serial: true
-    plan:
-      - aggregate:
-        - get: stemcell
-          resource: ubuntu-stemcell-3263
-          trigger: true
-          version: every
-          params:
-            preserve_filename: true
-        - *get-cpi-src
-        - *get-bosh-cli
-        - *get-cpi-release
-      - *create-light-stemcell
-      - *upload-ubuntu-raw-stemcells
-      - *verify-stemcell-boots
-
   - name: ubuntu-trusty-stemcell-3363
     serial: true
     plan:
@@ -238,23 +213,6 @@ jobs:
       - aggregate:
         - get: stemcell
           resource: ubuntu-stemcell-3421
-          trigger: true
-          version: every
-          params:
-            preserve_filename: true
-        - *get-cpi-src
-        - *get-bosh-cli
-        - *get-cpi-release
-      - *create-light-stemcell
-      - *upload-ubuntu-raw-stemcells
-      - *verify-stemcell-boots
-
-  - name: ubuntu-trusty-stemcell-3431
-    serial: true
-    plan:
-      - aggregate:
-        - get: stemcell
-          resource: ubuntu-stemcell-3431
           trigger: true
           version: every
           params:
@@ -316,63 +274,12 @@ jobs:
       - *upload-ubuntu-raw-alpha-stemcells
       - *verify-alpha-stemcell-boots
 
-  - name: centos-7-stemcell-3312
-    serial: true
-    plan:
-      - aggregate:
-        - get: stemcell
-          resource: centos-stemcell-3312
-          trigger: true
-          version: every
-          params:
-            preserve_filename: true
-        - *get-cpi-src
-        - *get-bosh-cli
-        - *get-cpi-release
-      - *create-light-stemcell
-      - *upload-centos-raw-stemcells
-      - *verify-stemcell-boots
-
-  - name: centos-7-stemcell-3363
-    serial: true
-    plan:
-      - aggregate:
-        - get: stemcell
-          resource: centos-stemcell-3363
-          trigger: true
-          version: every
-          params:
-            preserve_filename: true
-        - *get-cpi-src
-        - *get-bosh-cli
-        - *get-cpi-release
-      - *create-light-stemcell
-      - *upload-centos-raw-stemcells
-      - *verify-stemcell-boots
-
   - name: centos-7-stemcell-3421
     serial: true
     plan:
       - aggregate:
         - get: stemcell
           resource: centos-stemcell-3421
-          trigger: true
-          version: every
-          params:
-            preserve_filename: true
-        - *get-cpi-src
-        - *get-bosh-cli
-        - *get-cpi-release
-      - *create-light-stemcell
-      - *upload-centos-raw-stemcells
-      - *verify-stemcell-boots
-
-  - name: centos-7-stemcell-3431
-    serial: true
-    plan:
-      - aggregate:
-        - get: stemcell
-          resource: centos-stemcell-3431
           trigger: true
           version: every
           params:
@@ -452,13 +359,6 @@ resources:
       force_regular: true
       version_family: "3312"
 
-  - name: ubuntu-stemcell-3263
-    type: bosh-io-stemcell
-    source:
-      name: bosh-google-kvm-ubuntu-trusty-go_agent
-      force_regular: true
-      version_family: "3263"
-
   - name: ubuntu-stemcell-3363
     type: bosh-io-stemcell
     source:
@@ -472,13 +372,6 @@ resources:
       name: bosh-google-kvm-ubuntu-trusty-go_agent
       force_regular: true
       version_family: "3421"
-
-  - name: ubuntu-stemcell-3431
-    type: bosh-io-stemcell
-    source:
-      name: bosh-google-kvm-ubuntu-trusty-go_agent
-      force_regular: true
-      version_family: "3431"
 
   - name: ubuntu-stemcell-3445
     type: bosh-io-stemcell
@@ -521,33 +414,12 @@ resources:
       bucket:   {{google_alpha_stemcells_bucket_name}}
       regexp:   light-bosh-stemcell-([0-9\.]+)-google-kvm-ubuntu-trusty-go_agent.tgz
 
-  - name: centos-stemcell-3312
-    type: bosh-io-stemcell
-    source:
-      name: bosh-google-kvm-centos-7-go_agent
-      force_regular: true
-      version_family: "3312"
-
-  - name: centos-stemcell-3363
-    type: bosh-io-stemcell
-    source:
-      name: bosh-google-kvm-centos-7-go_agent
-      force_regular: true
-      version_family: "3363"
-
   - name: centos-stemcell-3421
     type: bosh-io-stemcell
     source:
       name: bosh-google-kvm-centos-7-go_agent
       force_regular: true
       version_family: "3421"
-
-  - name: centos-stemcell-3431
-    type: bosh-io-stemcell
-    source:
-      name: bosh-google-kvm-centos-7-go_agent
-      force_regular: true
-      version_family: "3431"
 
   - name: centos-stemcell-3445
     type: bosh-io-stemcell
