@@ -37,6 +37,11 @@ groups:
   - ubuntu-trusty-stemcell-alpha
 
 shared:
+  - &put-stemcells-index
+    put: stemcells-index
+    params:
+      repository: stemcells-index-output
+      rebase: true
   - &get-cpi-src
     get: builder-src
     trigger: false
@@ -188,7 +193,9 @@ jobs:
         - *get-cpi-release
       - *create-light-stemcell
       - *upload-ubuntu-raw-stemcells
+      - get: stemcells-index
       - *verify-stemcell-boots
+      - *put-stemcells-index
 
   - name: ubuntu-trusty-stemcell-3363
     serial: true
@@ -205,7 +212,9 @@ jobs:
         - *get-cpi-release
       - *create-light-stemcell
       - *upload-ubuntu-raw-stemcells
+      - get: stemcells-index
       - *verify-stemcell-boots
+      - *put-stemcells-index
 
   - name: ubuntu-trusty-stemcell-3421
     serial: true
@@ -222,7 +231,9 @@ jobs:
         - *get-cpi-release
       - *create-light-stemcell
       - *upload-ubuntu-raw-stemcells
+      - get: stemcells-index
       - *verify-stemcell-boots
+      - *put-stemcells-index
 
   - name: ubuntu-trusty-stemcell-3445
     serial: true
@@ -239,7 +250,9 @@ jobs:
         - *get-cpi-release
       - *create-light-stemcell
       - *upload-ubuntu-raw-stemcells
+      - get: stemcells-index
       - *verify-stemcell-boots
+      - *put-stemcells-index
 
   - name: ubuntu-trusty-stemcell-3468
     serial: true
@@ -256,7 +269,9 @@ jobs:
         - *get-cpi-release
       - *create-light-stemcell
       - *upload-ubuntu-raw-stemcells
+      - get: stemcells-index
       - *verify-stemcell-boots
+      - *put-stemcells-index
 
   - name: ubuntu-trusty-stemcell-alpha
     serial: true
@@ -309,6 +324,12 @@ jobs:
       - *verify-stemcell-boots
 
 resources:
+  - name: stemcells-index
+    type: git
+    source:
+      uri: git@github.com:bosh-io/stemcells-cpi-index.git
+      private_key: {{stemcells_index__github_key}}
+
   - name: bosh-cli
     type: s3
     source:
