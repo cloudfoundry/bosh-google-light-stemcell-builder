@@ -345,6 +345,7 @@ resources:
     type: git
     source:
       uri: git@github.com:bosh-io/stemcells-cpi-index.git
+      branch: master
       private_key: {{stemcells_index__github_key}}
 
   - name: bosh-cli
