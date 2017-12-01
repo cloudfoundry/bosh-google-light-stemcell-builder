@@ -32,9 +32,8 @@ meta4 file-set-url --metalink="$meta4_path" --file="${light_stemcell_name}" "htt
 
 pushd stemcells-index-output > /dev/null
   git add -A
-  git commit -c user.email="ci@localhost" \
-    -c user.name="CI Bot" \
-    -m "publish: $OS_NAME/$STEMCELL_VERSION"
+  git -c user.email="ci@localhost" -c user.name="CI Bot" \
+    commit -m "publish: $OS_NAME/$STEMCELL_VERSION"
 popd > /dev/null
 
 echo "Uploading light stemcell ${light_stemcell_name} to ${OUTPUT_BUCKET}..."
