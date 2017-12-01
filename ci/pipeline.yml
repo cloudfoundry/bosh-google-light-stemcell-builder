@@ -42,11 +42,6 @@ groups:
   - ubuntu-trusty-stemcell-alpha
 
 shared:
-  - &put-stemcells-index
-    put: stemcells-index
-    params:
-      repository: stemcells-index-output
-      rebase: true
   - &get-cpi-src
     get: builder-src
     trigger: false
@@ -168,6 +163,10 @@ shared:
         AWS_DEFAULT_REGION: {{google_light_stemcells_region}}
         AWS_ENDPOINT: {{google_light_stemcells_endpoint}}
         OUTPUT_BUCKET: {{google_light_stemcells_bucket_name}}
+    - put: stemcells-index
+      params:
+        repository: stemcells-index-output
+        rebase: true
     on_failure:
       *cleanup-failed-run-instructions
     ensure:
@@ -200,7 +199,6 @@ jobs:
       - *upload-ubuntu-raw-stemcells
       - get: stemcells-index
       - *verify-stemcell-boots
-      - *put-stemcells-index
 
   - name: ubuntu-trusty-stemcell-3363
     serial: true
@@ -219,7 +217,6 @@ jobs:
       - *upload-ubuntu-raw-stemcells
       - get: stemcells-index
       - *verify-stemcell-boots
-      - *put-stemcells-index
 
   - name: ubuntu-trusty-stemcell-3421
     serial: true
@@ -238,7 +235,6 @@ jobs:
       - *upload-ubuntu-raw-stemcells
       - get: stemcells-index
       - *verify-stemcell-boots
-      - *put-stemcells-index
 
   - name: ubuntu-trusty-stemcell-3445
     serial: true
@@ -257,7 +253,6 @@ jobs:
       - *upload-ubuntu-raw-stemcells
       - get: stemcells-index
       - *verify-stemcell-boots
-      - *put-stemcells-index
 
   - name: ubuntu-trusty-stemcell-3468
     serial: true
@@ -276,7 +271,6 @@ jobs:
       - *upload-ubuntu-raw-stemcells
       - get: stemcells-index
       - *verify-stemcell-boots
-      - *put-stemcells-index
 
   - name: ubuntu-trusty-stemcell-3422
     serial: true
@@ -295,7 +289,6 @@ jobs:
       - *upload-ubuntu-raw-stemcells
       - get: stemcells-index
       - *verify-stemcell-boots
-      - *put-stemcells-index
 
   - name: ubuntu-trusty-stemcell-alpha
     serial: true
