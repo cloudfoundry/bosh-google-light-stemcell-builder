@@ -9,6 +9,7 @@ groups:
   - ubuntu-trusty-stemcell-3468
   - ubuntu-trusty-stemcell-3469
   - ubuntu-trusty-stemcell-3541
+  - ubuntu-trusty-stemcell-3586
 
 - name: "3312"
   jobs:
@@ -37,6 +38,10 @@ groups:
 - name: "3541"
   jobs:
   - ubuntu-trusty-stemcell-3541
+
+- name: "3586"
+  jobs:
+  - ubuntu-trusty-stemcell-3586
 
 - name: alpha
   jobs:
@@ -299,6 +304,24 @@ jobs:
       - get: stemcells-index
       - *verify-stemcell-boots
 
+  - name: ubuntu-trusty-stemcell-3586
+    serial: true
+    plan:
+      - aggregate:
+        - get: stemcell
+          resource: ubuntu-stemcell-3586
+          trigger: true
+          version: every
+          params:
+            preserve_filename: true
+        - *get-cpi-src
+        - *get-bosh-cli
+        - *get-cpi-release
+      - *create-light-stemcell
+      - *upload-ubuntu-raw-stemcells
+      - get: stemcells-index
+      - *verify-stemcell-boots
+
   - name: ubuntu-trusty-stemcell-alpha
     serial: true
     plan:
@@ -414,6 +437,13 @@ resources:
       name: bosh-google-kvm-ubuntu-trusty-go_agent
       force_regular: true
       version_family: "3541"
+
+  - name: ubuntu-stemcell-3586
+    type: bosh-io-stemcell
+    source:
+      name: bosh-google-kvm-ubuntu-trusty-go_agent
+      force_regular: true
+      version_family: "3586"
 
   - name: ubuntu-stemcell-alpha
     type: s3
