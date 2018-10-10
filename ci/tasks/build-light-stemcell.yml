@@ -18,5 +18,7 @@ run:
   path: builder-src/ci/tasks/build-light-stemcell.sh
 
 params:
-  BUCKET_NAME:         ""
-  BOSH_IO_BUCKET_NAME: ""
+  BUCKET_NAME:           ""
+  STEMCELL_BUCKET_NAME:  ""
+  AWS_ACCESS_KEY_ID:     ""
+  AWS_SECRET_ACCESS_KEY: ""
