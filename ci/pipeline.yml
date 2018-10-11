@@ -37,8 +37,16 @@ shared:
     task: create-light-stemcell
     file: builder-src/ci/tasks/build-light-stemcell.yml
     params:
-      BUCKET_NAME:         {{google_raw_stemcells_bucket_name}}
-      BOSH_IO_BUCKET_NAME: {{bosh_io_light_stemcell_bucket}}
+      BUCKET_NAME:          ((google_raw_stemcells_bucket_name))
+      STEMCELL_BUCKET_NAME: ((bosh_io_light_stemcell_bucket))
+  - &create-lts-light-stemcell
+    task: create-light-stemcell
+    file: builder-src/ci/tasks/build-light-stemcell.yml
+    params:
+      BUCKET_NAME:           ((lts_google_raw_stemcells_bucket_name))
+      STEMCELL_BUCKET_NAME:  ((lts_light_bucket_name))
+      AWS_ACCESS_KEY_ID:     ((lts_light_bucket_access_key))
+      AWS_SECRET_ACCESS_KEY: ((lts_light_bucket_secret_key))
   - &cleanup-failed-run-instructions
     task: cleanup-failed-run-instructions
     config:
@@ -71,6 +79,16 @@ shared:
       params:
         file: raw-stemcell/bosh-stemcell-*-google-kvm-ubuntu-*-go_agent-raw-*.tar.gz.sha1
         predefined_acl: "publicRead"
+  - &upload-ubuntu-raw-lts-stemcells
+    aggregate:
+    - put: bosh-ubuntu-raw-lts-stemcells
+      params:
+        file: raw-stemcell/bosh-stemcell-*-google-kvm-ubuntu-*-go_agent-raw-*.tar.gz
+        predefined_acl: "publicRead"
+    - put: bosh-ubuntu-raw-lts-stemcells-sha1
+      params:
+        file: raw-stemcell/bosh-stemcell-*-google-kvm-ubuntu-*-go_agent-raw-*.tar.gz.sha1
+        predefined_acl: "publicRead"
   - &verify-stemcell-boots
     do:
     - put: terraform
@@ -80,16 +98,16 @@ shared:
     - task: deploy-skeletal
       file: builder-src/ci/tasks/deploy-skeletal.yml
       params:
-        SSH_PRIVATE_KEY: {{ssh_private_key}}
-        GCE_CREDENTIALS_JSON: {{gce_credentials_json}}
+        SSH_PRIVATE_KEY: ((ssh_private_key))
+        GCE_CREDENTIALS_JSON: ((gce_credentials_json))
     - task: publish-stemcell-and-checksum
       file: builder-src/ci/tasks/publish-stemcell-and-checksum.yml
       params:
-        AWS_ACCESS_KEY_ID: {{google_light_stemcells_access_key_id}}
-        AWS_SECRET_ACCESS_KEY: {{google_light_stemcells_secret_access_key}}
-        AWS_DEFAULT_REGION: {{google_light_stemcells_region}}
-        AWS_ENDPOINT: {{google_light_stemcells_endpoint}}
-        OUTPUT_BUCKET: {{google_light_stemcells_bucket_name}}
+        AWS_ACCESS_KEY_ID: ((google_light_stemcells_access_key_id))
+        AWS_SECRET_ACCESS_KEY: ((google_light_stemcells_secret_access_key))
+        AWS_DEFAULT_REGION: ((google_light_stemcells_region))
+        AWS_ENDPOINT: ((google_light_stemcells_endpoint))
+        OUTPUT_BUCKET: ((google_light_stemcells_bucket_name))
     - put: stemcells-index
       params:
         repository: stemcells-index-output
@@ -107,6 +125,45 @@ shared:
           action: destroy
         get_params:
           action: destroy
+  - &verify-lts-stemcell-boots
+    do:
+    - put: terraform
+      resource: terraform-lts
+      params:
+        generate_random_name: true
+        terraform_source: builder-src/ci/terraform/
+    - task: deploy-skeletal
+      file: builder-src/ci/tasks/deploy-skeletal.yml
+      params:
+        SSH_PRIVATE_KEY: ((ssh_private_key))
+        GCE_CREDENTIALS_JSON: ((lts_gce_credentials_json))
+    - task: publish-stemcell-and-checksum
+      file: builder-src/ci/tasks/publish-stemcell-and-checksum.yml
+      params:
+        AWS_ACCESS_KEY_ID: ((lts_light_bucket_access_key))
+        AWS_SECRET_ACCESS_KEY: ((lts_heavy_bucket_secret_key))
+        AWS_DEFAULT_REGION: us-east-1
+        AWS_ENDPOINT: https://s3.amazonaws.com
+        OUTPUT_BUCKET: ((lts_light_bucket_name))
+    - put: stemcells-index
+      resource: stemcells-lts-index
+      params:
+        repository: stemcells-index-output
+        rebase: true
+    on_failure:
+      *cleanup-failed-run-instructions
+    ensure:
+      task: destroy-skeletal
+      file: builder-src/ci/tasks/destroy-skeletal.yml
+      ensure:
+        put: terraform
+        resource: terraform-lts
+        params:
+          env_name_file: terraform/name
+          terraform_source: builder-src/ci/terraform/
+          action: destroy
+        get_params:
+          action: destroy
 
 jobs:
   - name: ubuntu-trusty-stemcell-3363
@@ -114,7 +171,7 @@ jobs:
     plan:
       - aggregate:
         - get: stemcell
-          resource: ubuntu-stemcell-3363
+          resource: ubuntu-lts-stemcell-3363
           trigger: true
           version: every
           params:
@@ -122,10 +179,11 @@ jobs:
         - *get-cpi-src
         - *get-bosh-cli
         - *get-cpi-release
-      - *create-light-stemcell
-      - *upload-ubuntu-raw-stemcells
+      - *create-lts-light-stemcell
+      - *upload-ubuntu-raw-lts-stemcells
       - get: stemcells-index
-      - *verify-stemcell-boots
+        resource: stemcells-lts-index
+      - *verify-lts-stemcell-boots
 
   - name: ubuntu-trusty-stemcell-3421
     serial: true
@@ -236,12 +294,20 @@ jobs:
       - *verify-stemcell-boots
 
 resources:
+
   - name: stemcells-index
     type: git
     source:
       uri: git@github.com:bosh-io/stemcells-cpi-index.git
       branch: master
-      private_key: {{stemcells_index__github_key}}
+      private_key: ((stemcells_index__github_key))
+
+  - name: stemcells-lts-index
+    type: git
+    source:
+      uri: ((lts_stemcells_uri))
+      branch: master
+      private_key: ((lts_stemcells_private_key))
 
   - name: bosh-cli
     type: s3
@@ -265,20 +331,43 @@ resources:
     source:
       delete_on_failure: true
       storage:
-        bucket: {{terraform_bucket_name}}
+        bucket: ((terraform_bucket_name))
         bucket_path: stemcell-ci-terraform/
-        access_key_id: {{terraform_bucket_access_key}}
-        secret_access_key: {{terraform_bucket_secret_key}}
+        access_key_id: ((terraform_bucket_access_key))
+        secret_access_key: ((terraform_bucket_secret_key))
       vars:
-        gce_project_id: {{gce_project_id}}
-        gce_credentials_json: {{gce_credentials_json}}
+        gce_project_id: ((gce_project_id))
+        gce_credentials_json: ((gce_credentials_json))
 
-  - name: ubuntu-stemcell-3363
-    type: bosh-io-stemcell
+  - name: terraform-lts
+    type: terraform
     source:
-      name: bosh-google-kvm-ubuntu-trusty-go_agent
-      force_regular: true
-      version_family: "3363"
+      delete_on_failure: true
+      storage:
+        bucket: ((lts_terraform_bucket_name))
+        bucket_path: stemcell-ci-terraform/
+        access_key_id: ((lts_terraform_bucket_access_key))
+        secret_access_key: ((lts_terraform_bucket_secret_key))
+      vars:
+        gce_project_id: ((lts_gce_project_id))
+        gce_credentials_json: ((lts_gce_credentials_json))
+
+  - name: ubuntu-lts-stemcell-3363
+    type: metalink-repository
+    source:
+      uri: ((lts_trusty_stemcells_uri))
+      options:
+        private_key: ((lts_stemcells_private_key))
+      version: 3363.x
+      include_files:
+      - bosh-stemcell-*-google-kvm-ubuntu-trusty-go_agent.tgz
+      url_handlers:
+      - type: s3
+        include:
+        - (s3|https)://.*
+        options:
+          access_key: ((lts_heavy_bucket_access_key)) # make bucket
+          secret_key: ((lts_heavy_bucket_secret_key))
 
   - name: ubuntu-stemcell-3421
     type: bosh-io-stemcell
@@ -324,15 +413,29 @@ resources:
   - name: bosh-ubuntu-raw-stemcells
     type: gcs-resource
     source:
-      json_key: {{gce_credentials_json}}
-      bucket:   {{google_raw_stemcells_bucket_name}}
+      json_key: ((gce_credentials_json))
+      bucket:   ((google_raw_stemcells_bucket_name))
       regexp:   bosh-stemcell-([0-9\.]+)-google-kvm-ubuntu-*-go_agent-raw.tar.gz
 
   - name: bosh-ubuntu-raw-stemcells-sha1
     type: gcs-resource
     source:
-      json_key: {{gce_credentials_json}}
-      bucket:   {{google_raw_stemcells_bucket_name}}
+      json_key: ((gce_credentials_json))
+      bucket:   ((google_raw_stemcells_bucket_name))
+      regexp:   bosh-stemcell-([0-9\.]+)-google-kvm-ubuntu-*-go_agent-raw.tar.gz.sha1
+
+  - name: bosh-ubuntu-raw-lts-stemcells
+    type: gcs-resource
+    source:
+      json_key: ((lts_gce_credentials_json))
+      bucket:   ((lts_google_raw_stemcells_bucket_name))
+      regexp:   bosh-stemcell-([0-9\.]+)-google-kvm-ubuntu-*-go_agent-raw.tar.gz
+
+  - name: bosh-ubuntu-raw-lts-stemcells-sha1
+    type: gcs-resource
+    source:
+      json_key: ((lts_gce_credentials_json))
+      bucket:   ((lts_google_raw_stemcells_bucket_name))
       regexp:   bosh-stemcell-([0-9\.]+)-google-kvm-ubuntu-*-go_agent-raw.tar.gz.sha1
 
 resource_types:
@@ -344,3 +447,7 @@ resource_types:
     type: docker-image
     source:
       repository: ljfranklin/terraform-resource
+  - name: metalink-repository
+    type: docker-image
+    source:
+      repository: dpb587/metalink-repository-resource
