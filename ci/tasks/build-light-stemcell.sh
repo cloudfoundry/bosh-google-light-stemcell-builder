@@ -4,8 +4,6 @@ set -eu
 
 : ${BUCKET_NAME:?}
 : ${STEMCELL_BUCKET_NAME:?} # used to check if current stemcell already exists
-: ${AWS_ACCESS_KEY_ID:?}
-: ${AWS_SECRET_ACCESS_KEY:?}
 
 stemcell_url() {
   resource="/${STEMCELL_BUCKET_NAME}/${light_stemcell_name}"
