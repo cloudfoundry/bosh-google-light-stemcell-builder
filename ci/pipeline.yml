@@ -145,6 +145,7 @@ shared:
         AWS_DEFAULT_REGION: us-east-1
         AWS_ENDPOINT: https://s3.amazonaws.com
         OUTPUT_BUCKET: ((lts_light_bucket_name))
+        META4_FOLDER_SUFFIX: -gcp-light
     - put: stemcells-index
       resource: stemcells-lts-index
       params:
