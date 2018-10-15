@@ -137,20 +137,11 @@ shared:
       params:
         SSH_PRIVATE_KEY: ((ssh_private_key))
         GCE_CREDENTIALS_JSON: ((lts_gce_credentials_json))
-    - task: publish-stemcell-and-checksum
-      file: builder-src/ci/tasks/publish-stemcell-and-checksum.yml
+    - put: stemcells-lts-index
       params:
-        AWS_ACCESS_KEY_ID: ((lts_light_bucket_access_key))
-        AWS_SECRET_ACCESS_KEY: ((lts_heavy_bucket_secret_key))
-        AWS_DEFAULT_REGION: us-east-1
-        AWS_ENDPOINT: https://s3.amazonaws.com
-        OUTPUT_BUCKET: ((lts_light_bucket_name))
-        META4_FOLDER_SUFFIX: -gcp-light
-    - put: stemcells-index
-      resource: stemcells-lts-index
-      params:
-        repository: stemcells-index-output
-        rebase: true
+        files:
+        - light-stemcell/*.tgz
+        version: stemcell/.resource/version
     on_failure:
       *cleanup-failed-run-instructions
     ensure:
@@ -183,7 +174,7 @@ jobs:
       - *create-lts-light-stemcell
       - *upload-ubuntu-raw-lts-stemcells
       - get: stemcells-index
-        resource: stemcells-lts-index
+        resource: ubuntu-lts-stemcell-3363
       - *verify-lts-stemcell-boots
 
   - name: ubuntu-trusty-stemcell-3421
@@ -304,11 +295,20 @@ resources:
       private_key: ((stemcells_index__github_key))
 
   - name: stemcells-lts-index
-    type: git
+    type: metalink-repository
     source:
-      uri: ((lts_stemcells_uri))
-      branch: master
-      private_key: ((lts_stemcells_private_key))
+      uri: ((lts_light_stemcells_uri))
+      options:
+        private_key: ((lts_stemcells_private_key))
+      url_handlers:
+      - type: s3
+        include:
+        - (s3|https)://.*
+        options:
+          access_key: ((lts_light_bucket_access_key)) # make bucket
+          secret_key: ((lts_light_bucket_secret_key))
+      mirror_files:
+      - destination: "s3://s3.amazonaws.com/((lts_light_bucket_name))/google/light/{{.Name}}"
 
   - name: bosh-cli
     type: s3
