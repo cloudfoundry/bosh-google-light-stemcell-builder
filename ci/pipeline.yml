@@ -308,7 +308,7 @@ resources:
         include:
         - (s3|https)://.*
         options:
-          access_key: ((lts_light_bucket_access_key)) # make bucket
+          access_key: ((lts_light_bucket_access_key))
           secret_key: ((lts_light_bucket_secret_key))
       mirror_files:
       - destination: "s3://s3.amazonaws.com/((lts_light_bucket_name))/google/light/{{.Name}}"
