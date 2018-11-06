@@ -8,7 +8,8 @@ groups:
   - ubuntu-trusty-stemcell-3468
   - ubuntu-trusty-stemcell-3541
   - ubuntu-trusty-stemcell-3586
-  - ubuntu-xenial-stemcell
+  - ubuntu-xenial-stemcell-97
+  - ubuntu-xenial-stemcell-170
 
 - name: "trusty"
   jobs:
@@ -21,7 +22,8 @@ groups:
 
 - name: "xenial"
   jobs:
-  - ubuntu-xenial-stemcell
+  - ubuntu-xenial-stemcell-97
+  - ubuntu-xenial-stemcell-170
 
 shared:
   - &get-cpi-src
@@ -137,7 +139,7 @@ shared:
       params:
         SSH_PRIVATE_KEY: ((ssh_private_key))
         GCE_CREDENTIALS_JSON: ((lts_gce_credentials_json))
-    - put: stemcells-lts-index
+    - put: lts-stemcells-index
       params:
         files:
         - light-stemcell/*.tgz
@@ -270,12 +272,30 @@ jobs:
       - get: stemcells-index
       - *verify-stemcell-boots
 
-  - name: ubuntu-xenial-stemcell
+  - name: ubuntu-xenial-stemcell-97
     serial: true
     plan:
       - aggregate:
         - get: stemcell
-          resource: ubuntu-xenial-stemcell
+          resource: ubuntu-xenial-stemcell-97
+          trigger: true
+          version: every
+          params:
+            preserve_filename: true
+        - *get-cpi-src
+        - *get-bosh-cli
+        - *get-cpi-release
+      - *create-light-stemcell
+      - *upload-ubuntu-raw-stemcells
+      - get: stemcells-index
+      - *verify-stemcell-boots
+
+  - name: ubuntu-xenial-stemcell-170
+    serial: true
+    plan:
+      - aggregate:
+        - get: stemcell
+          resource: ubuntu-xenial-stemcell-170
           trigger: true
           version: every
           params:
@@ -297,7 +317,7 @@ resources:
       branch: master
       private_key: ((stemcells_index__github_key))
 
-  - name: stemcells-lts-index
+  - name: lts-stemcells-index
     type: metalink-repository
     source:
       uri: ((lts_light_stemcells_uri))
@@ -438,11 +458,19 @@ resources:
       force_regular: true
       version_family: "3586"
 
-  - name: ubuntu-xenial-stemcell
+  - name: ubuntu-xenial-stemcell-97
     type: bosh-io-stemcell
     source:
       name: bosh-google-kvm-ubuntu-xenial-go_agent
       force_regular: true
+      version_family: "97"
+
+  - name: ubuntu-xenial-stemcell-170
+    type: bosh-io-stemcell
+    source:
+      name: bosh-google-kvm-ubuntu-xenial-go_agent
+      force_regular: true
+      version_family: "170"
 
   - name: bosh-ubuntu-raw-stemcells
     type: gcs-resource
