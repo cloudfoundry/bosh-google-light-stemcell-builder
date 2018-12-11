@@ -241,7 +241,7 @@ jobs:
     plan:
       - aggregate:
         - get: stemcell
-          resource: ubuntu-stemcell-3541
+          resource: ubuntu-lts-stemcell-3541
           trigger: true
           version: every
           params:
@@ -249,10 +249,11 @@ jobs:
         - *get-cpi-src
         - *get-bosh-cli
         - *get-cpi-release
-      - *create-light-stemcell
-      - *upload-ubuntu-raw-stemcells
+      - *create-lts-light-stemcell
+      - *upload-ubuntu-raw-lts-stemcells
       - get: stemcells-index
-      - *verify-stemcell-boots
+        resource: ubuntu-lts-stemcell-3541
+      - *verify-lts-stemcell-boots
 
   - name: ubuntu-trusty-stemcell-3586
     serial: true
@@ -444,12 +445,22 @@ resources:
           access_key: ((lts_heavy_bucket_access_key))
           secret_key: ((lts_heavy_bucket_secret_key))
 
-  - name: ubuntu-stemcell-3541
-    type: bosh-io-stemcell
+  - name: ubuntu-lts-stemcell-3541
+    type: metalink-repository
     source:
-      name: bosh-google-kvm-ubuntu-trusty-go_agent
-      force_regular: true
-      version_family: "3541"
+      uri: ((lts_trusty_stemcells_uri))
+      options:
+        private_key: ((lts_stemcells_private_key))
+      version: 3421.x
+      include_files:
+        - bosh-stemcell-*-google-kvm-ubuntu-trusty-go_agent.tgz
+      url_handlers:
+      - type: s3
+        include:
+        - (s3|https)://.*
+        options:
+          access_key: ((lts_heavy_bucket_access_key))
+          secret_key: ((lts_heavy_bucket_secret_key))
 
   - name: ubuntu-stemcell-3586
     type: bosh-io-stemcell
