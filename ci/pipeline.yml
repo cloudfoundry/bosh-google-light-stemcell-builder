@@ -10,6 +10,7 @@ groups:
   - ubuntu-trusty-stemcell-3586
   - ubuntu-xenial-stemcell-97
   - ubuntu-xenial-stemcell-170
+  - ubuntu-xenial-stemcell-250
 
 - name: "trusty"
   jobs:
@@ -24,6 +25,7 @@ groups:
   jobs:
   - ubuntu-xenial-stemcell-97
   - ubuntu-xenial-stemcell-170
+  - ubuntu-xenial-stemcell-250
 
 shared:
   - &get-cpi-src
@@ -309,6 +311,24 @@ jobs:
       - get: stemcells-index
       - *verify-stemcell-boots
 
+  - name: ubuntu-xenial-stemcell-250
+    serial: true
+    plan:
+      - aggregate:
+        - get: stemcell
+          resource: ubuntu-xenial-stemcell-250
+          trigger: true
+          version: every
+          params:
+            preserve_filename: true
+        - *get-cpi-src
+        - *get-bosh-cli
+        - *get-cpi-release
+      - *create-light-stemcell
+      - *upload-ubuntu-raw-stemcells
+      - get: stemcells-index
+      - *verify-stemcell-boots
+
 resources:
 
   - name: stemcells-index
@@ -482,6 +502,13 @@ resources:
       name: bosh-google-kvm-ubuntu-xenial-go_agent
       force_regular: true
       version_family: "170"
+
+  - name: ubuntu-xenial-stemcell-250
+    type: bosh-io-stemcell
+    source:
+      name: bosh-google-kvm-ubuntu-xenial-go_agent
+      force_regular: true
+      version_family: "250"
 
   - name: bosh-ubuntu-raw-stemcells
     type: gcs-resource
