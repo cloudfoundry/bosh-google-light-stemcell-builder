@@ -8,6 +8,10 @@ releases:
 resource_pools:
 - name: vms
   network: private
+  env:
+    bosh:
+      mbus:
+        cert: ((mbus_bootstrap_ssl))
   stemcell:
     url: file://assets/stemcell.tgz
   cloud_properties:
