@@ -58,9 +58,18 @@ cloud_provider:
   template: {name: google_cpi, release: bosh-google-cpi}
 
   mbus: ((gce_cloud_provider_mbus))
+  cert: ((mbus_bootstrap_ssl))
 
   properties:
     google: *google_properties
     agent: {mbus: ((gce_cloud_provider_agent_mbus)) }
     blobstore: {provider: local, path: /var/vcap/micro_bosh/data/cache}
     ntp: *ntp
+
+variables:
+- name: mbus_bootstrap_ssl
+  type: certificate
+  options:
+    ca: default_ca
+    common_name: ((skeletal_external_ip))
+    alternative_names: [((skeletal_external_ip))]
