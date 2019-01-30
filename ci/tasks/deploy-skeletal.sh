@@ -43,6 +43,7 @@ pushd "${output_dir}" > /dev/null
     -v gce_credentials_json="'${GCE_CREDENTIALS_JSON}'" \
     -v ssh_private_key="bosh.pem" \
     -l "${terraform_config}/metadata" \
+    --vars-store=./skeletal-deployment-vars.yml \
     "${src_dir}/ci/skeletal-deployment.yml" > ./skeletal-deployment.yml
 
   ${bosh_cli} -n create-env ./skeletal-deployment.yml
