@@ -1,5 +1,22 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-fly -t cpi sp -p light-gce-stemcells \
+set -e
+
+if [[ $(lpass status -q && echo $?) != 0 ]]; then
+  echo "Login with lpass first"
+  exit 1
+fi
+
+creds=$(lpass show --note "google stemcell concourse secrets")
+
+concourse_target__name=$(echo "$creds" | bosh int - --path=/concourse_target__name)
+concourse_target__team=$(echo "$creds" | bosh int - --path=/concourse_target__team)
+concourse_target__url=$(echo "$creds" | bosh int - --path=/concourse_target__url)
+concourse_pipeline=$(echo "$creds" | bosh int - --path=/concourse_pipeline)
+
+fly -t "$concourse_target__name" status || fly -t "$concourse_target__name" login -n "$concourse_target__team" -c "$concourse_target__url"
+
+fly -t "$concourse_target__name" set-pipeline \
+  -p "$concourse_pipeline" \
   -c "$SRC/ci/pipeline.yml" \
-  -l <(lpass show --note "google stemcell concourse secrets")
+  -l <(echo "$creds")
