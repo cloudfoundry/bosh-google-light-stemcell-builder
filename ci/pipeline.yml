@@ -65,7 +65,7 @@ shared:
           * remove artifacts of failed jobs:
           ```bash
           gcloud auth revoke --all # start with clean slate
-          gcloud auth activate-service-account light-stemcell-editor@bosh-cpi.iam.gserviceaccount.com --key-file <(lpass show --note "THE LASTPASS NOTE" | grep -v "^#" )
+          gcloud auth activate-service-account light-stemcell-editor@bosh-cpi.iam.gserviceaccount.com --key-file <(credhub get -n "/concourse/stemcell/gcp_json_key" -j | jq -r .value)
           gsutil rm gs://bosh-gce-raw-stemcells/STEMCELL_TO_BE_DELETED_raw.tar.gz
           gsutil rm gs://bosh-gce-raw-stemcells/STEMCELL_TO_BE_DELETED_raw.tar.gz.sha1
           gcloud auth revoke --all
